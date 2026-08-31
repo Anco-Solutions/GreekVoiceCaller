@@ -1,6 +1,6 @@
 {
   "name": "greek-voice-caller",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "main": "node_modules/expo/AppEntry.js",
   "scripts": {
@@ -12,6 +12,7 @@
     "@expo/vector-icons": "^14.1.0",
     "expo": "^53.0.0",
     "expo-contacts": "^14.2.0",
+    "expo-speech-recognition": "sdk-53",
     "expo-status-bar": "^2.2.3",
     "react": "19.0.0",
     "react-native": "0.79.2"

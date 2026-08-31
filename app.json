@@ -1,0 +1,18 @@
+{
+  "expo": {
+    "name": "Greek Voice Caller",
+    "slug": "greek-voice-caller",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSContactsUsageDescription": "Το Greek Voice Caller χρειάζεται πρόσβαση στις επαφές σας για να βρίσκει ποιον θέλετε να καλέσετε."
+      }
+    },
+    "android": {
+      "permissions": ["READ_CONTACTS", "CALL_PHONE"]
+    }
+  }
+}

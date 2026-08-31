@@ -44,12 +44,60 @@ function normalizeGreek(text = '') {
     .trim();
 }
 
+// Πολλές φυσικές ελληνικές διατυπώσεις για την ίδια εντολή.
 function extractCallName(transcript) {
-  const text = normalizeGreek(transcript);
+  let text = normalizeGreek(transcript);
+  text = text.replace(/^[,.;!?\s]+|[,.;!?\s]+$/g, '');
+  text = text.replace(/^παρακαλω\s+/i, '');
+
+  const prefixes = [
+    /^τηλεφωνησε\s+μου\s+/i,
+    /^τηλεφωνησε\s+/i,
+    /^τηλεφωνησε\s+τον\s+/i,
+    /^τηλεφωνησε\s+την\s+/i,
+    /^τηλεφωνησε\s+στον\s+/i,
+    /^τηλεφωνησε\s+στην\s+/i,
+    /^τηλεφωνησε\s+στη\s+/i,
+    /^τηλεφωνησε\s+μου\s+τον\s+/i,
+    /^τηλεφωνησε\s+μου\s+την\s+/i,
+    /^τηλεφωνησε\s+μου\s+στον\s+/i,
+    /^καλεσε\s+με\s+/i,
+    /^καλεσε\s+μου\s+/i,
+    /^καλεσε\s+/i,
+    /^καλεσε\s+τον\s+/i,
+    /^καλεσε\s+την\s+/i,
+    /^καλεσε\s+στον\s+/i,
+    /^καλεσε\s+στην\s+/i,
+    /^καλεσέ\s+μου\s+/i,
+    /^καλεσέ\s+τον\s+/i,
+    /^καλεσέ\s+την\s+/i,
+    /^παρε\s+τηλεφωνο\s+/i,
+    /^παρε\s+μου\s+τηλεφωνο\s+/i,
+    /^παρε\s+/i,
+    /^παρε\s+τον\s+/i,
+    /^παρε\s+την\s+/i,
+    /^παρε\s+στον\s+/i,
+    /^παρε\s+στην\s+/i,
+    /^παρε\s+στη\s+/i,
+  ];
+
+  for (const prefix of prefixes) {
+    if (prefix.test(text)) {
+      text = text.replace(prefix, '');
+      break;
+    }
+  }
+
+  // Άρθρα/πρόθεση που μπορεί να μείνουν από διαφορετική διατύπωση.
   return text
-    .replace(/^(παρακαλω\s+)?(παρε|καλεσε|τηλεφωνησε)\s+/i, '')
-    .replace(/^(τον|την|το|τη)\s+/i, '')
+    .replace(/^(τον|την|το|τη|στον|στην|στη|στο)\s+/i, '')
+    .replace(/\s+(παρακαλω|σε παρακαλω)$/i, '')
     .trim();
+}
+
+function isCallCommand(text) {
+  const normalized = normalizeGreek(text);
+  return /(^|\s)(παρε|καλεσε|τηλεφωνησε)(\s|$)/i.test(normalized);
 }
 
 function isRetryCommand(text) {
@@ -57,7 +105,7 @@ function isRetryCommand(text) {
   return (
     normalized.includes('κανει επανακληση') ||
     normalized.includes('κανε επανακληση') ||
-    normalized.includes('κάνει επανάκληση') ||
+    normalized.includes('κάνε επανάκληση') ||
     normalized.includes('επανάκληση') ||
     normalized.includes('επανακληση')
   );
@@ -125,7 +173,11 @@ export default function App() {
         interimResults: true,
         continuous: false,
         contextualStrings: [
-          'πάρε', 'κάλεσε', 'Γιώργος', 'Μαρία', 'Κώστας', 'τηλεφώνησε',
+          'πάρε', 'πάρε τον', 'πάρε την', 'πάρε τηλέφωνο', 'πάρε μου τηλέφωνο',
+          'κάλεσε', 'κάλεσέ τον', 'κάλεσέ την', 'κάλεσέ μου',
+          'τηλεφώνησε', 'τηλεφώνησέ τον', 'τηλεφώνησέ την', 'τηλεφώνησέ μου',
+          'πάρε τηλέφωνο τον', 'πάρε τηλέφωνο την', 'πάρε τηλέφωνο τη',
+          'τηλεφώνησε στον', 'τηλεφώνησε στην', 'τηλεφώνησε στη',
           'κάνει επανάκληση', 'κάνε επανάκληση', 'σταμάτα την επανάκληση',
         ],
       });
@@ -148,7 +200,7 @@ export default function App() {
       return;
     }
 
-    if (!/(παρε|καλεσε|τηλεφωνησε)/i.test(normalized)) {
+    if (!isCallCommand(command)) {
       setStatus(`Άκουσα: «${command}». Πες μου ποιον θέλεις να καλέσω.`);
       return;
     }
